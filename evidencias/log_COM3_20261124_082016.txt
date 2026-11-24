@@ -1,0 +1,266 @@
+08:20:16 | ets Jul 29 2019 12:21:46
+08:20:16 | rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+08:20:16 | configsip: 0, SPIWP:0xee
+08:20:16 | clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+08:20:16 | mode:DIO, clock div:1
+08:20:16 | load:0x3fff0030,len:4876
+08:20:16 | ho 0 tail 12 room 4
+08:20:16 | load:0x40078000,len:16532
+08:20:16 | load:0x40080400,len:3500
+08:20:16 | entry 0x400805b4
+08:20:16 | ESP32 conectado: @PRONTO RF1 A LIVRE
+08:20:30 | RX DATA | SEQ=0 | novo
+08:20:32 | ACK enviado | SEQ=0 | mapa=0x1
+08:20:42 | RX DATA | SEQ=0 | duplicado
+08:20:44 | ACK enviado | SEQ=0 | mapa=0x1
+08:21:10 | RX DATA | SEQ=0 | duplicado
+08:21:12 | ACK enviado | SEQ=0 | mapa=0x1
+08:21:16 | RX DATA | SEQ=0 | duplicado
+08:21:18 | ACK enviado | SEQ=0 | mapa=0x1
+08:22:48 | RX DATA | SEQ=0 | duplicado
+08:22:50 | ACK enviado | SEQ=0 | mapa=0x1
+08:22:54 | RX DATA | SEQ=0 | duplicado
+08:22:56 | ACK enviado | SEQ=0 | mapa=0x1
+08:22:59 | RX DATA | SEQ=0 | duplicado
+08:23:01 | ACK enviado | SEQ=0 | mapa=0x1
+08:23:22 | RX DATA | SEQ=0 | duplicado
+08:23:24 | ACK enviado | SEQ=0 | mapa=0x1
+08:23:27 | RX DATA | SEQ=1 | novo
+08:23:29 | ACK enviado | SEQ=1 | mapa=0x1
+08:23:31 | RX DATA | SEQ=2 | novo
+08:23:33 | ACK enviado | SEQ=2 | mapa=0x1
+08:23:35 | RX END | CRC-32 do objeto conferido
+08:23:37 | ACK enviado | SEQ=3 | mapa=0x1
+08:23:37 | RECEBIDO: recebidos/recebido_20261124_082337_233960.txt
+08:23:37 | SHA-256 recebido: b536b775e8f0de87a93fb06d071c03af7d8a67afbeb5383e0d02ea46ead65e54
+08:23:37 | Texto: oieeeeeeeeeee bom dia
+08:24:18 | RX DATA | SEQ=0 | novo
+08:24:20 | ACK enviado | SEQ=0 | mapa=0x1
+08:24:23 | RX DATA | SEQ=1 | novo
+08:24:25 | ACK enviado | SEQ=1 | mapa=0x1
+08:24:27 | RX DATA | SEQ=2 | novo
+08:24:29 | ACK enviado | SEQ=2 | mapa=0x1
+08:24:32 | RX DATA | SEQ=3 | novo
+08:24:34 | ACK enviado | SEQ=3 | mapa=0x1
+08:24:36 | RX DATA | SEQ=4 | novo
+08:24:38 | ACK enviado | SEQ=4 | mapa=0x1
+08:24:40 | RX DATA | SEQ=5 | novo
+08:24:43 | ACK enviado | SEQ=5 | mapa=0x1
+08:24:45 | RX DATA | SEQ=6 | novo
+08:24:47 | ACK enviado | SEQ=6 | mapa=0x1
+08:24:49 | RX DATA | SEQ=7 | novo
+08:24:51 | ACK enviado | SEQ=7 | mapa=0x1
+08:24:54 | RX DATA | SEQ=8 | novo
+08:24:56 | ACK enviado | SEQ=8 | mapa=0x1
+08:24:58 | RX DATA | SEQ=9 | novo
+08:25:00 | ACK enviado | SEQ=9 | mapa=0x1
+08:25:03 | RX DATA | SEQ=10 | novo
+08:25:05 | ACK enviado | SEQ=10 | mapa=0x1
+08:25:07 | RX DATA | SEQ=11 | novo
+08:25:09 | ACK enviado | SEQ=11 | mapa=0x1
+08:25:11 | RX DATA | SEQ=12 | novo
+08:25:14 | ACK enviado | SEQ=12 | mapa=0x1
+08:25:16 | RX DATA | SEQ=13 | novo
+08:25:18 | ACK enviado | SEQ=13 | mapa=0x1
+08:25:19 | RX END | CRC-32 do objeto conferido
+08:25:21 | ACK enviado | SEQ=14 | mapa=0x1
+08:25:22 | RECEBIDO: recebidos/recebido_20261124_082521_948013.png
+08:25:22 | SHA-256 recebido: 08ad677f0a62a897e925775d46d39e8c074394e0cf5c90611e0112e1840588e1
+08:26:32 | ENVIO J, 664 bytes, modo S; SHA-256: 1b2042bdaa0b1f05cf1ec7b77ff2ad7165aec01666def3c5bf074fcd30565c85
+08:26:32 | @INICIO 664 68
+08:26:32 | TX DATA | quadro 1/68 | SEQ=0
+08:26:38 | Timeout | reenviando o que ficou sem ACK
+08:26:38 | RETX DATA | quadro 1/68 | SEQ=0
+08:26:44 | Timeout | reenviando o que ficou sem ACK
+08:26:44 | RETX DATA | quadro 1/68 | SEQ=0
+08:26:48 | ACK recebido | quadro 1/68
+08:26:48 | TX DATA | quadro 2/68 | SEQ=1
+08:26:52 | ACK recebido | quadro 2/68
+08:26:52 | TX DATA | quadro 3/68 | SEQ=2
+08:26:57 | ACK recebido | quadro 3/68
+08:26:57 | TX DATA | quadro 4/68 | SEQ=3
+08:27:01 | ACK recebido | quadro 4/68
+08:27:01 | TX DATA | quadro 5/68 | SEQ=4
+08:27:05 | ACK recebido | quadro 5/68
+08:27:06 | TX DATA | quadro 6/68 | SEQ=5
+08:27:10 | ACK recebido | quadro 6/68
+08:27:10 | TX DATA | quadro 7/68 | SEQ=6
+08:27:14 | ACK recebido | quadro 7/68
+08:27:15 | TX DATA | quadro 8/68 | SEQ=7
+08:27:19 | ACK recebido | quadro 8/68
+08:27:19 | TX DATA | quadro 9/68 | SEQ=8
+08:27:23 | ACK recebido | quadro 9/68
+08:27:23 | TX DATA | quadro 10/68 | SEQ=9
+08:27:28 | ACK recebido | quadro 10/68
+08:27:28 | TX DATA | quadro 11/68 | SEQ=10
+08:27:32 | ACK recebido | quadro 11/68
+08:27:32 | TX DATA | quadro 12/68 | SEQ=11
+08:27:38 | Timeout | reenviando o que ficou sem ACK
+08:27:38 | RETX DATA | quadro 12/68 | SEQ=11
+08:27:44 | Timeout | reenviando o que ficou sem ACK
+08:27:44 | RETX DATA | quadro 12/68 | SEQ=11
+08:27:49 | Timeout | reenviando o que ficou sem ACK
+08:27:49 | RETX DATA | quadro 12/68 | SEQ=11
+08:27:54 | ACK recebido | quadro 12/68
+08:27:54 | TX DATA | quadro 13/68 | SEQ=12
+08:27:58 | ACK recebido | quadro 13/68
+08:27:58 | TX DATA | quadro 14/68 | SEQ=13
+08:28:02 | ACK recebido | quadro 14/68
+08:28:03 | TX DATA | quadro 15/68 | SEQ=14
+08:28:07 | ACK recebido | quadro 15/68
+08:28:07 | TX DATA | quadro 16/68 | SEQ=15
+08:28:11 | ACK recebido | quadro 16/68
+08:28:12 | TX DATA | quadro 17/68 | SEQ=16
+08:28:16 | ACK recebido | quadro 17/68
+08:28:16 | TX DATA | quadro 18/68 | SEQ=17
+08:28:20 | ACK recebido | quadro 18/68
+08:28:20 | TX DATA | quadro 19/68 | SEQ=18
+08:28:25 | ACK recebido | quadro 19/68
+08:28:25 | TX DATA | quadro 20/68 | SEQ=19
+08:28:29 | ACK recebido | quadro 20/68
+08:28:29 | TX DATA | quadro 21/68 | SEQ=20
+08:28:35 | Timeout | reenviando o que ficou sem ACK
+08:28:35 | RETX DATA | quadro 21/68 | SEQ=20
+08:28:41 | Timeout | reenviando o que ficou sem ACK
+08:28:41 | RETX DATA | quadro 21/68 | SEQ=20
+08:28:47 | Timeout | reenviando o que ficou sem ACK
+08:28:47 | RETX DATA | quadro 21/68 | SEQ=20
+08:28:52 | Timeout | reenviando o que ficou sem ACK
+08:28:52 | RETX DATA | quadro 21/68 | SEQ=20
+08:28:56 | ACK recebido | quadro 21/68
+08:28:57 | TX DATA | quadro 22/68 | SEQ=21
+08:29:01 | ACK recebido | quadro 22/68
+08:29:01 | TX DATA | quadro 23/68 | SEQ=22
+08:29:05 | ACK recebido | quadro 23/68
+08:29:06 | TX DATA | quadro 24/68 | SEQ=23
+08:29:10 | ACK recebido | quadro 24/68
+08:29:10 | TX DATA | quadro 25/68 | SEQ=24
+08:29:14 | ACK recebido | quadro 25/68
+08:29:14 | TX DATA | quadro 26/68 | SEQ=25
+08:29:19 | ACK recebido | quadro 26/68
+08:29:19 | TX DATA | quadro 27/68 | SEQ=26
+08:29:23 | ACK recebido | quadro 27/68
+08:29:23 | TX DATA | quadro 28/68 | SEQ=27
+08:29:27 | ACK recebido | quadro 28/68
+08:29:28 | TX DATA | quadro 29/68 | SEQ=28
+08:29:32 | ACK recebido | quadro 29/68
+08:29:32 | TX DATA | quadro 30/68 | SEQ=29
+08:29:36 | ACK recebido | quadro 30/68
+08:29:37 | TX DATA | quadro 31/68 | SEQ=30
+08:29:41 | ACK recebido | quadro 31/68
+08:29:41 | TX DATA | quadro 32/68 | SEQ=31
+08:29:45 | ACK recebido | quadro 32/68
+08:29:45 | TX DATA | quadro 33/68 | SEQ=32
+08:29:50 | ACK recebido | quadro 33/68
+08:29:50 | TX DATA | quadro 34/68 | SEQ=33
+08:29:54 | ACK recebido | quadro 34/68
+08:29:54 | TX DATA | quadro 35/68 | SEQ=34
+08:29:58 | ACK recebido | quadro 35/68
+08:29:59 | TX DATA | quadro 36/68 | SEQ=35
+08:30:03 | ACK recebido | quadro 36/68
+08:30:03 | TX DATA | quadro 37/68 | SEQ=36
+08:30:07 | ACK recebido | quadro 37/68
+08:30:08 | TX DATA | quadro 38/68 | SEQ=37
+08:30:12 | ACK recebido | quadro 38/68
+08:30:12 | TX DATA | quadro 39/68 | SEQ=38
+08:30:16 | ACK recebido | quadro 39/68
+08:30:16 | TX DATA | quadro 40/68 | SEQ=39
+08:30:21 | ACK recebido | quadro 40/68
+08:30:21 | TX DATA | quadro 41/68 | SEQ=40
+08:30:25 | ACK recebido | quadro 41/68
+08:30:25 | TX DATA | quadro 42/68 | SEQ=41
+08:30:29 | ACK recebido | quadro 42/68
+08:30:30 | TX DATA | quadro 43/68 | SEQ=42
+08:30:34 | ACK recebido | quadro 43/68
+08:30:34 | TX DATA | quadro 44/68 | SEQ=43
+08:30:38 | ACK recebido | quadro 44/68
+08:30:39 | TX DATA | quadro 45/68 | SEQ=44
+08:30:43 | ACK recebido | quadro 45/68
+08:30:43 | TX DATA | quadro 46/68 | SEQ=45
+08:30:47 | ACK recebido | quadro 46/68
+08:30:47 | TX DATA | quadro 47/68 | SEQ=46
+08:30:52 | ACK recebido | quadro 47/68
+08:30:52 | TX DATA | quadro 48/68 | SEQ=47
+08:30:56 | ACK recebido | quadro 48/68
+08:30:56 | TX DATA | quadro 49/68 | SEQ=48
+08:31:00 | ACK recebido | quadro 49/68
+08:31:01 | TX DATA | quadro 50/68 | SEQ=49
+08:31:05 | ACK recebido | quadro 50/68
+08:31:05 | TX DATA | quadro 51/68 | SEQ=50
+08:31:09 | ACK recebido | quadro 51/68
+08:31:10 | TX DATA | quadro 52/68 | SEQ=51
+08:31:14 | ACK recebido | quadro 52/68
+08:31:14 | TX DATA | quadro 53/68 | SEQ=52
+08:31:18 | ACK recebido | quadro 53/68
+08:31:18 | TX DATA | quadro 54/68 | SEQ=53
+08:31:23 | ACK recebido | quadro 54/68
+08:31:23 | TX DATA | quadro 55/68 | SEQ=54
+08:31:27 | ACK recebido | quadro 55/68
+08:31:27 | TX DATA | quadro 56/68 | SEQ=55
+08:31:31 | ACK recebido | quadro 56/68
+08:31:32 | TX DATA | quadro 57/68 | SEQ=56
+08:31:36 | ACK recebido | quadro 57/68
+08:31:36 | TX DATA | quadro 58/68 | SEQ=57
+08:31:40 | ACK recebido | quadro 58/68
+08:31:41 | TX DATA | quadro 59/68 | SEQ=58
+08:31:45 | ACK recebido | quadro 59/68
+08:31:45 | TX DATA | quadro 60/68 | SEQ=59
+08:31:49 | ACK recebido | quadro 60/68
+08:31:49 | TX DATA | quadro 61/68 | SEQ=60
+08:31:54 | ACK recebido | quadro 61/68
+08:31:54 | TX DATA | quadro 62/68 | SEQ=61
+08:31:58 | ACK recebido | quadro 62/68
+08:31:58 | TX DATA | quadro 63/68 | SEQ=62
+08:32:02 | ACK recebido | quadro 63/68
+08:32:03 | TX DATA | quadro 64/68 | SEQ=63
+08:32:07 | ACK recebido | quadro 64/68
+08:32:07 | TX DATA | quadro 65/68 | SEQ=64
+08:32:11 | ACK recebido | quadro 65/68
+08:32:11 | TX DATA | quadro 66/68 | SEQ=65
+08:32:16 | ACK recebido | quadro 66/68
+08:32:16 | TX DATA | quadro 67/68 | SEQ=66
+08:32:22 | Timeout | reenviando o que ficou sem ACK
+08:32:22 | RETX DATA | quadro 67/68 | SEQ=66
+08:32:27 | Timeout | reenviando o que ficou sem ACK
+08:32:27 | RETX DATA | quadro 67/68 | SEQ=66
+08:32:32 | ACK recebido | quadro 67/68
+08:32:32 | TX DATA | quadro 68/68 | SEQ=67
+08:32:38 | Timeout | reenviando o que ficou sem ACK
+08:32:38 | RETX DATA | quadro 68/68 | SEQ=67
+08:32:42 | ACK recebido | quadro 68/68
+08:32:42 | TX END
+08:32:47 | Timeout | reenviando o que ficou sem ACK
+08:32:47 | RETX END
+08:32:52 | Timeout | reenviando o que ficou sem ACK
+08:32:52 | RETX END
+08:32:56 | Timeout | reenviando o que ficou sem ACK
+08:32:56 | RETX END
+08:33:01 | Timeout | reenviando o que ficou sem ACK
+08:33:01 | RETX END
+08:33:04 | @FIM 392278
+08:34:16 | ENVIO T, 42 bytes, modo R; SHA-256: da6989886581ad3333bdd673804b02d290281acd09387cd050b3d0a2cc8ca8a9
+08:34:16 | @INICIO 42 5
+08:34:16 | TX DATA | quadro 1/5 | SEQ=0
+08:34:19 | TX DATA | quadro 2/5 | SEQ=1
+08:34:21 | TX DATA | quadro 3/5 | SEQ=2
+08:34:23 | TX DATA | quadro 4/5 | SEQ=3
+08:34:29 | Timeout | reenviando o que ficou sem ACK
+08:34:29 | RETX DATA | quadro 1/5 | SEQ=0
+08:34:32 | RETX DATA | quadro 2/5 | SEQ=1
+08:34:34 | RETX DATA | quadro 3/5 | SEQ=2
+08:34:37 | RETX DATA | quadro 4/5 | SEQ=3
+08:34:42 | Timeout | reenviando o que ficou sem ACK
+08:34:42 | RETX DATA | quadro 1/5 | SEQ=0
+08:34:45 | RETX DATA | quadro 2/5 | SEQ=1
+08:34:47 | RETX DATA | quadro 3/5 | SEQ=2
+08:34:50 | RETX DATA | quadro 4/5 | SEQ=3
+08:34:54 | ACK recebido | quadro 2/5
+08:34:54 | ACK recebido | quadro 3/5
+08:34:54 | ACK recebido | quadro 4/5
+08:34:54 | RETX DATA | quadro 1/5 | SEQ=0
+08:34:58 | ACK recebido | quadro 1/5
+08:34:58 | TX DATA | quadro 5/5 | SEQ=4
+08:35:03 | ACK recebido | quadro 5/5
+08:35:03 | TX END
+08:35:06 | @FIM 49932
+

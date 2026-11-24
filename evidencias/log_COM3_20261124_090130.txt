@@ -1,0 +1,62 @@
+09:01:30 | ets Jul 29 2019 12:21:46
+09:01:30 | rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+09:01:30 | configsip: 0, SPIWP:0xee
+09:01:30 | clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+09:01:30 | mode:DIO, clock div:1
+09:01:30 | load:0x3fff0030,len:4876
+09:01:30 | ho 0 tail 12 room 4
+09:01:30 | load:0x40078000,len:16532
+09:01:30 | load:0x40080400,len:3500
+09:01:30 | entry 0x400805b4
+09:01:30 | ESP32 conectado: @PRONTO RF1 A LIVRE
+09:01:49 | ENVIO T, 20 bytes, modo S; SHA-256: 5775dfb21e9f90c20c2471d3ff23a9187719dd3aba51f86f8f5b2b8fff1b6720
+09:01:49 | @INICIO 20 3
+09:01:49 | TX DATA | quadro 1/3 | SEQ=0
+09:01:55 | Timeout | reenviando o que ficou sem ACK
+09:01:55 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:01 | Timeout | reenviando o que ficou sem ACK
+09:02:01 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:07 | Timeout | reenviando o que ficou sem ACK
+09:02:07 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:12 | Timeout | reenviando o que ficou sem ACK
+09:02:12 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:18 | Timeout | reenviando o que ficou sem ACK
+09:02:18 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:24 | Timeout | reenviando o que ficou sem ACK
+09:02:24 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:30 | Timeout | reenviando o que ficou sem ACK
+09:02:30 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:35 | Timeout | reenviando o que ficou sem ACK
+09:02:35 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:41 | Timeout | reenviando o que ficou sem ACK
+09:02:41 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:47 | Timeout | reenviando o que ficou sem ACK
+09:02:47 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:53 | Timeout | reenviando o que ficou sem ACK
+09:02:53 | RETX DATA | quadro 1/3 | SEQ=0
+09:02:58 | Timeout | reenviando o que ficou sem ACK
+09:02:58 | RETX DATA | quadro 1/3 | SEQ=0
+09:03:03 | ACK recebido | quadro 1/3
+09:03:03 | TX DATA | quadro 2/3 | SEQ=1
+09:03:09 | Timeout | reenviando o que ficou sem ACK
+09:03:09 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:14 | Timeout | reenviando o que ficou sem ACK
+09:03:14 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:20 | Timeout | reenviando o que ficou sem ACK
+09:03:20 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:26 | Timeout | reenviando o que ficou sem ACK
+09:03:26 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:31 | Timeout | reenviando o que ficou sem ACK
+09:03:31 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:37 | Timeout | reenviando o que ficou sem ACK
+09:03:37 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:43 | Timeout | reenviando o que ficou sem ACK
+09:03:43 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:49 | Timeout | reenviando o que ficou sem ACK
+09:03:49 | RETX DATA | quadro 2/3 | SEQ=1
+09:03:53 | ACK recebido | quadro 2/3
+09:03:53 | TX DATA | quadro 3/3 | SEQ=2
+09:03:57 | ACK recebido | quadro 3/3
+09:03:58 | TX END
+09:04:01 | @FIM 131294
+

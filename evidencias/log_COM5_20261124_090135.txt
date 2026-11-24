@@ -1,0 +1,25 @@
+09:01:35 | ts Jul 29 2019 12:21:46
+09:01:35 | rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+09:01:35 | configsip: 0, SPIWP:0xee
+09:01:35 | clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+09:01:35 | mode:DIO, clock div:1
+09:01:35 | load:0x3fff0030,len:4876
+09:01:35 | ho 0 tail 12 room 4
+09:01:35 | load:0x40078000,len:16532
+09:01:35 | load:0x40080400,len:3500
+09:01:35 | entry 0x400805b4
+09:01:35 | ESP32 conectado: @PRONTO RF1 B LIVRE
+09:03:01 | RX DATA | SEQ=0 | novo
+09:03:03 | ACK enviado | SEQ=0 | mapa=0x1
+09:03:22 | RX DATA | SEQ=1 | novo
+09:03:24 | ACK enviado | SEQ=1 | mapa=0x1
+09:03:51 | RX DATA | SEQ=1 | duplicado
+09:03:53 | ACK enviado | SEQ=1 | mapa=0x1
+09:03:55 | RX DATA | SEQ=2 | novo
+09:03:57 | ACK enviado | SEQ=2 | mapa=0x1
+09:03:59 | RX END | CRC-32 do objeto conferido
+09:04:01 | ACK enviado | SEQ=3 | mapa=0x1
+09:04:01 | RECEBIDO: recebidos/recebido_20261124_090401_348545.txt
+09:04:01 | SHA-256 recebido: 5775dfb21e9f90c20c2471d3ff23a9187719dd3aba51f86f8f5b2b8fff1b6720
+09:04:01 | Texto: oiiiiiiiiiiiiiiiiiii
+

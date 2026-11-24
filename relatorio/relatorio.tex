@@ -1,0 +1,206 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\geometry{left=3cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,pdftitle={Transmissão confiável de texto e imagem via RF 433 MHz}}
+\setlength{\parindent}{1.2cm}
+\setlength{\parskip}{0.25em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{ESP32 e RF 433 MHz}
+\fancyhead[R]{Transmissão e Comunicação de Dados}
+\fancyfoot[C]{\thepage}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single,columns=fullflexible,showstringspaces=false}
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+{\large INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE MATO GROSSO\par}
+\vspace{0.3cm}
+{\large Curso de Engenharia da Computação\par}
+\vfill
+{\LARGE\bfseries TRANSMISSÃO CONFIÁVEL DE TEXTO E IMAGEM ENTRE ESP32 VIA RF 433 MHz\par}
+\vspace{0.5cm}
+{\large CRC-8, Stop-and-Wait e Selective Repeat com reconstrução no computador receptor\par}
+\vfill
+\begin{flushleft}
+\textbf{Integrantes:} Luanna Rabelo; Isis Tosti; Sophia Metello\\
+\textbf{Disciplina:} Transmissão e Comunicação de Dados\\
+\textbf{Professor:} Ruy de Oliveira
+\end{flushleft}
+\vfill
+CUIABÁ\\2026
+\end{center}
+\end{titlepage}
+
+\begin{abstract}
+Este trabalho apresenta um enlace entre duas placas ESP32 e dois computadores, com quatro módulos de radiofrequência de 433 MHz: um transmissor e um receptor em cada placa. O computador A envia texto ou uma imagem escolhida por caminho de arquivo; o ESP32 A transmite quadros pelo rádio; o ESP32 B confirma o recebimento pelo caminho reverso; e o computador B salva o objeto reconstruído. O OLED da placa B exibe texto e sinaliza a chegada de imagem. O protocolo usa codificação Manchester, quadros de até 21 bytes, CRC-8 para detectar quadros alterados, CRC-32 para conferir o objeto completo e duas alternativas de retransmissão: Stop-and-Wait e Selective Repeat com janela de quatro quadros. Logs de bancada comprovam recepção de texto e imagem, inclusive com retransmissões. A distância informada nos testes foi de 0,8 a 1,0 m; o requisito de distância superior a 1 m e a avaliação sob ruído controlado ainda exigem registro experimental complementar.
+
+\noindent\textbf{Palavras-chave:} ESP32; RF 433 MHz; CRC; ARQ; Manchester; imagem.
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{Introdução}
+O enunciado da disciplina solicita comunicação exclusivamente por módulos RF entre dois ESP32, transmissão confiável de texto e pequenas imagens, exibição do texto no display receptor, FCS, descarte de quadros corrompidos, retransmissão e demonstração presencial \cite{projeto}. A montagem do grupo usa OLED SSD1306 no lugar do LCD indicado no enunciado; a aceitação dessa substituição deve ser confirmada com o docente.
+
+O programa em Python atua apenas como interface USB local de cada ESP32. Não existe comunicação direta entre os computadores. A imagem é reconstruída e salva no computador receptor, sem ocupar o OLED. O código atual oferece texto, fotografia colorida compactada e imagem monocromática rápida. A opção de enviar o arquivo original foi retirada da interface a pedido do grupo.
+
+\section{Objetivos}
+\subsection{Objetivo geral}
+Implementar e demonstrar uma comunicação confiável de texto e imagem entre dois ESP32 usando somente rádio de 433 MHz entre as placas.
+
+\subsection{Objetivos específicos}
+\begin{itemize}
+\item definir o quadro \texttt{FLAG|TYPE|SEQ|LEN|DATA|FCS}, com até 21 bytes;
+\item detectar e descartar quadros alterados com CRC-8;
+\item recuperar perdas com Stop-and-Wait ou Selective Repeat, escolhidos antes de cada envio;
+\item confirmar o objeto completo com tamanho e CRC-32;
+\item mostrar texto no OLED e salvar imagens no computador receptor;
+\item registrar transmissões, confirmações, retransmissões e resultados nos dois computadores.
+\end{itemize}
+
+\section{Arquitetura e montagem}
+Cada protoboard contém um ESP32, um módulo TX e um módulo RX de 433 MHz. O TX da placa A chega ao RX da B; o TX da B devolve ACK ao RX da A. Ambos os computadores usam USB somente para conversar com seu próprio ESP32. Assim, as mensagens de aplicação e os ACKs atravessam o rádio.
+
+\begin{center}
+\fbox{\parbox{0.9\linewidth}{\centering
+PC A $\overset{\text{USB}}{\longleftrightarrow}$ ESP32 A $\xrightarrow{\text{RF DATA/END}}$ ESP32 B $\overset{\text{USB}}{\longleftrightarrow}$ PC B\\[0.5em]
+ESP32 A $\xleftarrow{\text{RF ACK}}$ ESP32 B \qquad ESP32 B $\rightarrow$ OLED (texto)
+}}
+\end{center}
+
+\begin{table}[h]
+\centering
+\caption{Conexões adotadas nas duas placas.}
+\begin{tabular}{lll}
+\toprule
+Ligação & Placa A & Placa B \\
+\midrule
+DATA do transmissor RF & GPIO 26 & GPIO 26, para ACK \\
+DATA do receptor RF & GPIO 27, para ACK & GPIO 27 \\
+OLED I\textsuperscript{2}C & não instalado & SDA 21, SCL 22 \\
+GND e alimentação & conforme os módulos & conforme os módulos \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os GPIO 21 e 22 são uma configuração I\textsuperscript{2}C usual para ESP32 no ambiente Arduino \cite{arduinoi2c}. O programa tenta os endereços \texttt{0x3C} e \texttt{0x3D} do OLED. A tensão do sinal que entra em cada ESP32 deve ser compatível com 3,3 V. O modelo exato e a tensão nominal dos módulos RF utilizados precisam ser conferidos na peça antes de reproduzir a montagem. A fotografia da Figura~\ref{fig:oled} documenta o display da protoboard B; ela não permite verificar todas as ligações de rádio.
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=6.0cm,keepaspectratio]{figuras/montagem_oled.png}
+\caption{Detalhe da montagem do ESP32 e OLED fornecido pelo grupo.}
+\label{fig:oled}
+\end{figure}
+
+\section{Formato do quadro e codificação física}
+O enlace usa transmissão RF bruta, sem RadioHead. Cada bit é codificado em duas metades Manchester de 5 ms, resultando em 10 ms por bit. Antes do quadro, o firmware envia preâmbulo e sincronismo \texttt{0xD391}. Esses elementos pertencem à camada física e não entram nos 21 bytes máximos do quadro da Figura 2 do enunciado.
+
+\begin{table}[h]
+\centering
+\caption{Quadro lógico transmitido pelo rádio.}
+\begin{tabular}{llll}
+\toprule
+Campo & Bytes & Valor ou faixa & Função \\
+\midrule
+FLAG & 1 & \texttt{0x7E} & início \\
+TYPE & 1 & 1, 2 ou 3 & DATA, ACK ou END \\
+SEQ & 1 & 0 a 255 & sequência/base \\
+LEN & 1 & 0 a 16 & comprimento de DATA \\
+DATA & 0 a 16 & bytes & carga e controle \\
+FCS & 1 & CRC-8 & verificação \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O maior quadro contém $1+1+1+1+16+1=21$ bytes. O CRC-8 cobre \texttt{TYPE}, \texttt{SEQ}, \texttt{LEN} e os \texttt{LEN} bytes de \texttt{DATA}; não cobre \texttt{FLAG} nem o próprio FCS. DATA transporta dez bytes do objeto e seis bytes de controle: identificador de sessão (4), informação da rodada (1) e base da rodada (1). O primeiro fragmento do objeto contém tipo (1), tamanho (2) e CRC-32 (4). Os tipos de uso atual são texto UTF-8, JPEG colorido compacto e pixels monocromáticos 32$\times$32. O preenchimento do último quadro não participa do CRC-32.
+
+\section{Detecção e recuperação de erros}
+\subsection{Cálculo do FCS}
+Foi escolhido CRC-8 com polinômio $x^8+x^2+x+1$ (representação hexadecimal \texttt{0x07}), registrador inicial zero, sem reflexão e sem XOR final. Para cada byte protegido, o algoritmo faz XOR com o acumulador e repete oito vezes:
+\begin{equation}
+c_{j+1}=\begin{cases}
+((c_j\ll 1)\oplus\texttt{0x07})\bmod 256,&\text{se o bit mais alto de }c_j\text{ era 1};\\
+(c_j\ll 1)\bmod 256,&\text{caso contrário.}
+\end{cases}
+\end{equation}
+Como verificação independente da rotina, a sequência ASCII \texttt{123456789} produz \texttt{0xF4}. O receptor recalcula o FCS sobre os bytes recebidos; se diferir do byte anexado, descarta o quadro e não confirma aqueles dados. O CRC-32 do objeto completo é uma segunda verificação antes de entregar texto ou imagem ao computador.
+
+\subsection{Stop-and-Wait}
+O transmissor envia um DATA, espera o ACK do mesmo número e repete o quadro após o tempo limite se a confirmação não chegar. O receptor reconhece uma duplicata e responde novamente, evitando duplicar bytes quando apenas o ACK se perde. Depois de todos os DATA, o transmissor envia END; o receptor verifica quantidade de quadros, comprimento e CRC-32, responde com ACK e entrega o objeto uma única vez.
+
+\subsection{Selective Repeat}
+O transmissor mantém janela de até quatro sequências. O receptor aceita quadros fora de ordem, armazena cada sequência uma única vez e devolve um mapa de bits no ACK: cada bit confirma independentemente uma posição relativa à base da rodada. O transmissor retransmite somente as posições ainda não confirmadas. Há 200 ms entre DATA de uma rodada, para dar tempo de recuperação aos módulos RF. A janela deslizante é definida pelo primeiro quadro pendente; não depende de o anterior ter chegado em ordem para armazenar os posteriores.
+
+\subsection{Erro proposital}
+A interface dispõe do comando \texttt{x}, que altera um byte de um DATA na primeira tentativa \emph{depois} de calcular o FCS. O receptor deve marcar FCS inválido e o transmissor deve recuperar o fragmento por retransmissão. Nos logs incluídos neste relatório, não foi localizado um ensaio completo com \texttt{x} ativado e confirmação do evento \texttt{FCS INVALIDO}; portanto, essa demonstração permanece como teste a registrar, e não como resultado observado.
+
+\section{Software e reprodução}
+O pacote contém \texttt{tx\_final.ino}, \texttt{rx\_final.ino}, biblioteca comum \texttt{RadioProjeto} e \texttt{projeto\_rf.py}. Os dois sketches são separados e definem se a placa usa OLED. O mesmo Python roda nos dois computadores, conectando-se a uma porta COM local a 115200 bit/s. O programa salva objetos e logs na pasta \texttt{recebidos}. O envio por caminho de arquivo ocorre no PC A; a recepção é reconstruída no PC B. O caminho digitado não é transmitido: o Python lê e prepara os bytes da imagem antes de enviá-los ao ESP32.
+
+Para reproduzir, instalam-se as bibliotecas Adafruit GFX, Adafruit SSD1306 e RadioProjeto na Arduino IDE, grava-se o sketch TX na placa A e o RX na B, conecta-se cada computador ao seu ESP32 e inicia-se \texttt{projeto\_rf.py} em ambos. Com o monitor serial fechado, seleciona-se a COM local. Na interface, \texttt{s} escolhe Stop-and-Wait, \texttt{r} escolhe Selective Repeat, \texttt{t} envia texto e \texttt{i} solicita o caminho da imagem. No modo imagem, Enter cria JPEG colorido de até 32$\times$32; \texttt{m} cria 128 bytes de pixels em preto e branco. O Python do receptor precisa ficar aberto durante o envio para salvar o arquivo.
+
+\section{Metodologia experimental}
+Os registros usados foram produzidos em 24/11/2026 com dois ESP32 conectados ao mesmo computador por portas COM diferentes, mantendo o enlace entre placas por módulos RF. Foram escolhidos envios de texto e imagem e os modos Stop-and-Wait e Selective Repeat. O programa registra horário, tipo, tamanho, algoritmo, SHA-256 da carga, eventos de quadro/ACK e duração até \texttt{@FIM}. No receptor, registra \texttt{RX END | CRC-32 do objeto conferido}, caminho do arquivo salvo e SHA-256 recebido.
+
+As portas COM não identificam permanentemente as placas; a confirmação de papel é a resposta \texttt{@PRONTO RF1 A} ou \texttt{B}. Alguns logs históricos mostram as duas placas como A após uma gravação equivocada. Foram escolhidos apenas pares de logs em que o conteúdo e o SHA-256 coincidem para sustentar as conclusões de entrega. Uma confirmação \texttt{@FIM} prova ACK do objeto no enlace, mas o arquivo no PC B depende de o Python receptor estar ativo.
+
+\section{Resultados e evidências}
+\begin{table}[h]
+\centering
+\caption{Exemplos verificados nos logs locais. Duração é a informada pelo transmissor.}
+\begin{tabular}{p{3.4cm}p{1.7cm}p{1.2cm}p{1.7cm}p{4cm}}
+\toprule
+Objeto e horário & Modo & Bytes & Duração & Evidência de entrega \\
+\midrule
+Texto, 09:01--09:04 & S & 20 & 131,294 s & SHA-256 igual nos dois lados; arquivo TXT \\
+JPEG compacto, 08:26--08:33 & S & 664 & 392,278 s & SHA-256 igual; arquivo JPG \\
+Texto, 08:34--08:35 & R & 42 & 49,932 s & SHA-256 igual; arquivo TXT \\
+Monocromática, 08:24--08:25 & S & 128 & 70,940 s & SHA-256 igual; arquivo PNG \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No exemplo de texto das 09:01, o SHA-256 em TX e RX foi \texttt{5775dfb21e9f90c20c2471d3ff23a9187719dd3aba51f86f8f5b2b8fff1b6720}. No JPEG de 664 bytes, foi \texttt{1b2042bdaa0b1f05cf1ec7b77ff2ad7165aec01666def3c5bf074fcd30565c85}. A coincidência comprova a igualdade dos bytes preparados pelo Python e salvos após a transmissão, além da checagem CRC-32 realizada pelo ESP32 B. A Figura~\ref{fig:recebida} mostra o JPEG reconstruído; sua resolução foi reduzida deliberadamente para diminuir o tempo de rádio.
+
+\begin{figure}[h]
+\centering
+\fbox{\includegraphics[width=4cm]{figuras/imagem_recebida.jpg}}
+\caption{JPEG colorido recebido e salvo no computador receptor (arquivo de 664 bytes).}
+\label{fig:recebida}
+\end{figure}
+
+Os logs contêm \texttt{Timeout | reenviando o que ficou sem ACK} e \texttt{RETX DATA}, demonstrando recuperação em tentativas com perda de confirmação. Em um teste anterior de texto com três quadros, o Stop-and-Wait concluiu em 56,684 s e o Selective Repeat concluiu em 124,827 s, mas eram mensagens diferentes e não constituem uma comparação controlada de desempenho. O Selective Repeat também entregou um texto de 42 bytes em 49,932 s. Portanto, ambos funcionaram; não se afirma superioridade de velocidade sem repetir a mesma carga nas mesmas condições.
+
+A distância relatada pelo grupo foi de aproximadamente 80 cm a 1 m. O requisito do enunciado é \emph{superior} a 1 m, ainda não verificado. Não há medição documentada de ruído externo nem ensaio registrado com erro proposital; a ocorrência de timeout e retransmissão demonstra recuperação de perdas, mas não quantifica tolerância a ruído controlado.
+
+\section{Limitações e próximos ensaios}
+Cada DATA de 21 bytes, a 10 ms por bit Manchester, ocupa cerca de 1,68 s de transmissão lógica, além do preâmbulo, sincronismo, cauda, pausas e ACK. Por isso, imagens coloridas compactas de algumas centenas de bytes podem levar minutos. O modo monocromático é mais rápido, mas perde cor e detalhes. A foto JPEG recebida corresponde à versão compactada preparada no computador A, não ao arquivo de origem em resolução plena.
+
+Para completar os critérios presenciais: medir e registrar distância maior que 1 m; repetir a mesma mensagem curta com S e R e anotar tempo e retransmissões; executar \texttt{x} e guardar os dois logs mostrando erro de FCS, descarte e recuperação; registrar as condições de ruído; demonstrar o texto no OLED; e confirmar com o docente o uso do OLED em lugar do LCD. Esses ensaios não devem ser apresentados como realizados antes de sua execução.
+
+\section{Conclusão}
+Foi implementado um enlace RF bidirecional de controle entre dois ESP32, com transmissão de texto e imagens do computador A ao B, CRC-8 por quadro, CRC-32 por objeto e dois métodos de ARQ. Os logs confirmam entregas de texto, PNG monocromático e JPEG compacto com SHA-256 correspondente nos dois computadores, inclusive após retransmissões. A demonstração do texto no OLED foi informada pelo grupo como funcional, mas não há fotografia ou registro de tela final anexado a esta versão do relatório. Distância superior a 1 m e ruído controlado permanecem pendentes de evidência.
+
+\section{Disponibilidade dos arquivos}
+O pacote de entrega contém código-fonte, instruções de montagem, este relatório em LaTeX e exemplos de logs e arquivos recebidos. O repositório deste projeto é \url{https://github.com/luannarabeloo/esp32-rf-433mhz-texto-imagem}. O repositório citado em conversas anteriores foi apenas referência e não faz parte desta entrega.
+
+\begin{thebibliography}{9}
+\bibitem{projeto} INSTITUTO FEDERAL DE MATO GROSSO. \emph{Projeto Final da Disciplina Transmissão e Comunicação de Dados: transmissão confiável via rádio}. Material da disciplina, 2026.
+\bibitem{arduinoi2c} ESPRESSIF SYSTEMS. \emph{GPIO Matrix and Pin Mux -- Arduino ESP32 Documentation}. Disponível em: \url{https://docs.espressif.com/projects/arduino-esp32/en/latest/tutorials/io_mux.html}. Acesso em: 24 nov. 2026.
+\bibitem{datasheet} ESPRESSIF SYSTEMS. \emph{ESP32-WROOM-32 Datasheet}. Disponível em: \url{https://documentation.espressif.com/esp32-wroom-32_datasheet_en.html}. Acesso em: 24 nov. 2026.
+\end{thebibliography}
+\end{document}
