@@ -79,6 +79,7 @@ class Radio:
         self.serial = serial.Serial(porta, 115200, timeout=0.2, write_timeout=2)
         self.registro = (PASTA / ("log_" + porta + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".txt")).open("w", encoding="utf-8")
         self.pronto = threading.Event()
+        self.papel = None
         self.ocupado = threading.Event()
         self.parar = threading.Event()
         self.trava = threading.Lock()
@@ -114,6 +115,9 @@ class Radio:
 
     def receber(self, linha):
         if linha.startswith("@PRONTO RF1 "):
+            partes = linha.split()
+            if len(partes) >= 4 and partes[2] in ("A", "B"):
+                self.papel = partes[2]
             self.pronto.set()
             if linha.endswith("OCUPADO"):
                 self.ocupado.set()
@@ -135,6 +139,9 @@ class Radio:
             self.log(linha)
 
     def enviar(self, modo, tipo, dados, erro):
+        if self.papel != "A":
+            print("Apenas a placa A inicia envios; a B recebe e envia ACK.")
+            return
         if self.ocupado.is_set():
             print("ESP32 ocupado; aguarde @FIM ou use c para cancelar.")
             return
@@ -184,10 +191,14 @@ def iniciar():
             return
         modo, erro = "S", False
         print("Comandos: s=Stop-and-Wait  r=Selective Repeat  t=texto  i=imagem  x=erro  c=cancelar  q=sair")
+        if radio.papel == "B":
+            print("Placa B: deixe este programa aberto para receber e salvar os arquivos.")
         print("Arquivos recebidos:", PASTA)
         while not radio.parar.is_set():
             opcao = input(f"\n[{modo}] > ").strip().lower()
-            if opcao in ("s", "r"):
+            if radio.papel == "B" and opcao in ("s", "r", "t", "i", "x"):
+                print("Placa B apenas recebe; use esses comandos na placa A.")
+            elif opcao in ("s", "r"):
                 modo = opcao.upper()
                 print("Modo:", "Stop-and-Wait" if modo == "S" else "Selective Repeat")
             elif opcao == "x":

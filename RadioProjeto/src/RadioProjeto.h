@@ -601,6 +601,12 @@ void processarLinha() {
     }
     return;
   }
+  // A inicia DATA/END; B transmite somente ACK. Assim as duas placas nao
+  // iniciam objetos simultaneamente e deixam de ignorar DATA uma da outra.
+  if (COM_OLED && strncmp(linha, "ENVIA ", 6) == 0) {
+    Serial.println("@ERRO Placa B apenas recebe e confirma");
+    return;
+  }
   if (enviando || respostaPendente) { Serial.println("@ERRO Radio ocupado"); return; }
   // ENVIA <S|R> <T|M|P|J> <0|1> <hexadecimal>
   if (linhaLonga || tamanhoLinha < 14 || strncmp(linha, "ENVIA ", 6) ||

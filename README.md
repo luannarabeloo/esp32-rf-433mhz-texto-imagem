@@ -29,7 +29,7 @@ Cada placa precisa de **um módulo TX e um RX de 433 MHz**. Ligue o GND de cada 
 
 ## Usar
 
-Deixe o Python aberto nos dois PCs. No **PC A**, digite `s` para **Stop-and-Wait** ou `r` para **Selective Repeat** (janela de quatro quadros). Depois use `t` para digitar texto ou `i` para informar o **caminho completo de uma imagem**. É possível alternar entre texto e imagem e mudar o ARQ a cada novo envio. `x` liga/desliga a corrupção proposital de um quadro para demonstrar descarte e retransmissão; `c` cancela; `q` encerra.
+Deixe o Python aberto nos dois PCs. **Somente a placa A inicia envios**; a B recebe dados e transmite ACKs. No **PC A**, digite `s` para **Stop-and-Wait** ou `r` para **Selective Repeat** (janela de quatro quadros). Depois use `t` para digitar texto ou `i` para informar o **caminho completo de uma imagem**. É possível alternar entre texto e imagem e mudar o ARQ a cada novo envio. `x` liga/desliga a corrupção proposital de um quadro para demonstrar descarte e retransmissão; `c` cancela; `q` encerra. Na B, basta deixar o Python aberto para receber.
 
 Para imagem, **Enter** envia uma foto colorida compactada como JPEG, com no máximo **32 × 32 pixels**. Ela continua reconhecível como foto, mas perde resolução para caber no rádio; o JPEG recebido contém exatamente os bytes enviados. Escolha `m` para a versão preta e branca de 128 bytes, mais rápida. Texto tem limite de 2.048 bytes em UTF-8. O programa imprime o caminho do arquivo recebido e o SHA-256 da carga em ambos os PCs.
 
