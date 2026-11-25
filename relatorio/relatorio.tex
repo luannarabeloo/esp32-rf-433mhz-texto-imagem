@@ -46,7 +46,7 @@ CUIABÁ\\2026
 \end{titlepage}
 
 \begin{abstract}
-Este trabalho apresenta um enlace entre duas placas ESP32 e dois computadores, com quatro módulos de radiofrequência de 433 MHz: um transmissor e um receptor em cada placa. O computador A envia texto ou uma imagem escolhida por caminho de arquivo; o ESP32 A transmite quadros pelo rádio; o ESP32 B confirma o recebimento pelo caminho reverso; e o computador B salva o objeto reconstruído. O OLED da placa B exibe texto e sinaliza a chegada de imagem. O protocolo usa codificação Manchester, quadros de até 21 bytes, CRC-8 para detectar quadros alterados, CRC-32 para conferir o objeto completo e duas alternativas de retransmissão: Stop-and-Wait e Selective Repeat com janela de quatro quadros. Logs de bancada comprovam recepção de texto e imagem, inclusive com retransmissões. A distância informada nos testes foi de 0,8 a 1,0 m; o requisito de distância superior a 1 m e a avaliação sob ruído controlado ainda exigem registro experimental complementar.
+Este trabalho apresenta um enlace entre duas placas ESP32 e dois computadores, com quatro módulos de radiofrequência de 433 MHz: um transmissor e um receptor em cada placa. O computador A envia texto ou uma imagem escolhida por caminho de arquivo; o ESP32 A transmite quadros pelo rádio; o ESP32 B confirma o recebimento pelo caminho reverso; e o computador B salva o objeto reconstruído. O OLED da placa B exibe texto e sinaliza a chegada de imagem. O protocolo usa codificação Manchester, quadros de até 21 bytes, CRC-8 para detectar quadros alterados, CRC-32 para conferir o objeto completo e duas alternativas de retransmissão: Stop-and-Wait e Selective Repeat com janela de quatro quadros. Foram auditados 37 logs locais, que incluem entregas de texto e imagem, dois ensaios de corrupção proposital com detecção de FCS e recuperação, além de tentativas interrompidas, perda de ACK e falhas de acesso à porta serial. Uma fotografia documenta o arranjo usado à distância estimada pelo grupo em 0,8 a 1,0 m. O requisito estrito de distância superior a 1 m e a avaliação com interferência externa controlada ainda exigem ensaios específicos.
 
 \noindent\textbf{Palavras-chave:} ESP32; RF 433 MHz; CRC; ARQ; Manchester; imagem.
 \end{abstract}
@@ -146,7 +146,7 @@ O transmissor envia um DATA, espera o ACK do mesmo número e repete o quadro ap�
 O transmissor mantém janela de até quatro sequências. O receptor aceita quadros fora de ordem, armazena cada sequência uma única vez e devolve um mapa de bits no ACK: cada bit confirma independentemente uma posição relativa à base da rodada. O transmissor retransmite somente as posições ainda não confirmadas. Há 200 ms entre DATA de uma rodada, para dar tempo de recuperação aos módulos RF. A janela deslizante é definida pelo primeiro quadro pendente; não depende de o anterior ter chegado em ordem para armazenar os posteriores.
 
 \subsection{Erro proposital}
-A interface dispõe do comando \texttt{x}, que altera um byte de um DATA na primeira tentativa \emph{depois} de calcular o FCS. O receptor deve marcar FCS inválido e o transmissor deve recuperar o fragmento por retransmissão. Nos logs incluídos neste relatório, não foi localizado um ensaio completo com \texttt{x} ativado e confirmação do evento \texttt{FCS INVALIDO}; portanto, essa demonstração permanece como teste a registrar, e não como resultado observado.
+A interface dispõe do comando \texttt{x}, que altera um byte de um DATA na primeira tentativa \emph{depois} de calcular o FCS. O receptor detecta a divergência, registra \texttt{FCS INVALIDO}, descarta o quadro e não confirma aquele fragmento. O transmissor esgota o tempo de espera e o reenvia. A Seção~\ref{sec:erro_observado} documenta dois ensaios efetivamente registrados, um em cada sentido durante o desenvolvimento. Trata-se de corrupção deliberada dos bytes transmitidos pelo firmware, não de uma medida de interferência eletromagnética externa.
 
 \section{Software e reprodução}
 O pacote contém \texttt{tx\_final.ino}, \texttt{rx\_final.ino}, biblioteca comum \texttt{RadioProjeto} e \texttt{projeto\_rf.py}. Os dois sketches são separados e definem se a placa usa OLED. O mesmo Python roda nos dois computadores, conectando-se a uma porta COM local a 115200 bit/s. O programa salva objetos e logs na pasta \texttt{recebidos}. O envio por caminho de arquivo ocorre no PC A; a recepção é reconstruída no PC B. O caminho digitado não é transmitido: o Python lê e prepara os bytes da imagem antes de enviá-los ao ESP32.
@@ -156,7 +156,7 @@ Para reproduzir, instalam-se as bibliotecas Adafruit GFX, Adafruit SSD1306 e Rad
 \section{Metodologia experimental}
 Os registros usados foram produzidos em 24/11/2026 com dois ESP32 conectados ao mesmo computador por portas COM diferentes, mantendo o enlace entre placas por módulos RF. Foram escolhidos envios de texto e imagem e os modos Stop-and-Wait e Selective Repeat. O programa registra horário, tipo, tamanho, algoritmo, SHA-256 da carga, eventos de quadro/ACK e duração até \texttt{@FIM}. No receptor, registra \texttt{RX END | CRC-32 do objeto conferido}, caminho do arquivo salvo e SHA-256 recebido.
 
-As portas COM não identificam permanentemente as placas; a confirmação de papel é a resposta \texttt{@PRONTO RF1 A} ou \texttt{B}. Alguns logs históricos mostram as duas placas como A após uma gravação equivocada. Foram escolhidos apenas pares de logs em que o conteúdo e o SHA-256 coincidem para sustentar as conclusões de entrega. Uma confirmação \texttt{@FIM} prova ACK do objeto no enlace, mas o arquivo no PC B depende de o Python receptor estar ativo.
+As portas COM não identificam permanentemente as placas; a confirmação de papel é a resposta \texttt{@PRONTO RF1 A} ou \texttt{B}. Alguns logs históricos mostram as duas placas como A após uma gravação equivocada. Foram escolhidos apenas pares de logs em que o conteúdo e o SHA-256 coincidem para sustentar as conclusões de entrega. Uma confirmação \texttt{@FIM} registra que o transmissor recebeu o ACK final do objeto, mas o arquivo no PC B depende de o Python receptor estar ativo.
 
 \section{Resultados e evidências}
 \begin{table}[h]
@@ -185,15 +185,120 @@ No exemplo de texto das 09:01, o SHA-256 em TX e RX foi \texttt{5775dfb21e9f90c2
 
 Os logs contêm \texttt{Timeout | reenviando o que ficou sem ACK} e \texttt{RETX DATA}, demonstrando recuperação em tentativas com perda de confirmação. Em um teste anterior de texto com três quadros, o Stop-and-Wait concluiu em 56,684 s e o Selective Repeat concluiu em 124,827 s, mas eram mensagens diferentes e não constituem uma comparação controlada de desempenho. O Selective Repeat também entregou um texto de 42 bytes em 49,932 s. Portanto, ambos funcionaram; não se afirma superioridade de velocidade sem repetir a mesma carga nas mesmas condições.
 
-A distância relatada pelo grupo foi de aproximadamente 80 cm a 1 m. O requisito do enunciado é \emph{superior} a 1 m, ainda não verificado. Não há medição documentada de ruído externo nem ensaio registrado com erro proposital; a ocorrência de timeout e retransmissão demonstra recuperação de perdas, mas não quantifica tolerância a ruído controlado.
+A distância relatada pelo grupo foi de aproximadamente 80 cm a 1 m. O requisito do enunciado é \emph{superior} a 1 m, ainda não verificado. Há ensaio registrado com corrupção proposital e recuperação, porém não há medição documentada de ruído externo. A ocorrência de timeout e retransmissão demonstra recuperação de perdas em algumas sessões, mas não quantifica a tolerância a uma fonte externa de interferência controlada.
+
+\section{Auditoria completa dos registros de execução}
+\label{sec:auditoria}
+Para distinguir os resultados demonstrados das impressões obtidas durante a montagem, foram examinados todos os 37 arquivos locais com nome \texttt{log\_COM*.txt} disponíveis até o encerramento da coleta. Esses arquivos são recortes sucessivos das portas seriais COM3 e COM5, e não 37 experimentos independentes: uma mesma bancada foi aberta e reiniciada várias vezes, alguns arquivos não têm par no outro computador e determinados envios começaram antes do fim da captura. As contagens da Tabela~\ref{tab:auditoria} são de \emph{eventos registrados}, sem normalização por tempo, carga, distância ou versão do firmware. Elas servem para tornar rastreável a revisão do conjunto, não para estimar uma taxa de erro do canal.
+
+\begin{table}[h]
+\centering
+\caption{Inventário de eventos nos 37 logs locais (24/11/2026).}
+\label{tab:auditoria}
+\begin{tabular}{p{8cm}r}
+\toprule
+Indicador extraído literalmente dos arquivos & Ocorrências \\
+\midrule
+Logs iniciados com placa identificada como A / B & 29 / 8 \\
+Comandos \texttt{ENVIO} registrados (S / R) & 60 (38 / 22) \\
+\texttt{@FIM} / \texttt{@CANCELADO} / tentativa sem desfecho no mesmo arquivo & 29 / 18 / 13 \\
+Objetos efetivamente salvos com registro \texttt{RECEBIDO:} & 16 \\
+Linhas de timeout / \texttt{RETX DATA} & 1160 / 1672 \\
+Linhas \texttt{ERRO INJETADO} / \texttt{FCS INVALIDO} & 2 / 2 \\
+Avisos de desconexão da porta serial & 12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os 13 envios sem desfecho no mesmo arquivo não devem ser automaticamente chamados de falhas definitivas: houve encerramento ou troca do terminal e falta o par remoto em parte do histórico. Do mesmo modo, os 29 \texttt{@FIM} não equivalem a 29 arquivos comprovadamente salvos neste acervo. O contador de retransmissões soma tentativas de DATA de tamanhos diferentes; uma imagem de 68 quadros naturalmente produz mais eventos que um texto de um quadro. A coexistência de confirmações e longas séries de timeout mostra um enlace \emph{intermitente} na bancada observada, mas a tabela não separa perda de DATA, perda do ACK, conflito de transmissão, alimentação ou problema da interface USB.
+
+\subsection{Leitura cronológica dos ensaios}
+No início da manhã, \texttt{log\_COM3\_20261124\_070220.txt} registrou texto de 23 bytes em Stop-and-Wait concluído em 56,684 s, com sete retransmissões de DATA. Um texto de 14 bytes em Selective Repeat terminou em 124,827 s após 33 retransmissões; outro envio R foi cancelado. A imagem monocromática de 128 bytes em S terminou em 65,196 s sem retransmissão de DATA nessa sessão. Houve ainda uma tentativa histórica de 1999 bytes no formato de arquivo original, que avançou por muitos quadros, mas foi cancelada; a opção de transmitir o original foi posteriormente removida da interface, conforme o escopo definido pelo grupo. A passagem pelo número de sequência 100 nessa tentativa não caracteriza um limite de 100 quadros do protocolo.
+
+Entre 07:48 e 08:35 apareceram evidências dos dois lados: a placa B recebeu texto e confirmou duplicatas em \texttt{log\_COM5\_20261124\_074852.txt}; depois, o conjunto \texttt{log\_COM3\_20261124\_082016.txt} e \texttt{log\_COM5\_20261124\_082007.txt} registrou JPEG de 664 bytes, texto em R e imagem monocromática. Os hashes coincidentes e os arquivos salvos sustentam a integridade desses objetos. Porém, nesse segundo par ambos os terminais se identificaram como A, situação de desenvolvimento causada por gravação de papel incorreto. O enlace RF e a reconstrução foram exercitados, mas esse par não serve como demonstração do OLED da placa B.
+
+Nos registros das 08:48, os dois lados ainda apareciam como A; a identificação B voltou a constar no log COM5 iniciado às 08:57. A distinção é relevante porque uma placa gravada como A não inicializa o OLED pelo caminho reservado a B. Mesmo após corrigir o papel, algumas tentativas entre 08:58 e 09:00 foram canceladas sem ACK. Portanto, a correção de sketch era necessária para o display, mas não explica sozinha toda a instabilidade de rádio.
+
+Às 09:01, um texto de 20 bytes no modo S terminou em 131,294 s e foi salvo na placa B com o mesmo SHA-256 do emissor. Mais tarde, às 09:23 e 09:25, ocorreram os dois ensaios com erro deliberado descritos adiante. A partir das 10:38, os logs voltam a mostrar períodos sem ACK, alguns envios concluídos e desconexões seriais. Na série vespertina entre 17:20 e 19:01 há várias sessões de textos curtos com dezenas ou centenas de retransmissões sem conclusão registrada; outras foram canceladas. Exemplos incluem 83 \texttt{RETX DATA} sem ACK em uma tentativa iniciada às 17:49 e 124 retransmissões de um texto de 12 bytes iniciado às 18:05, antes do cancelamento às 18:17. Em contrapartida, textos R iniciados às 18:17 e 18:21 concluíram, respectivamente, em 96,730 e 100,070 s. O comportamento variável em uma mesma tarde impede interpretar o sistema como permanentemente funcional ou permanentemente inoperante.
+
+No log iniciado às 19:22, já após a restrição de novos envios à placa A, foram registrados oito \texttt{@FIM} sucessivos: textos em S e R, uma imagem monocromática de 128 bytes em R e um JPEG de 664 bytes em S. O JPEG concluiu em 459,258 s com 27 retransmissões de DATA; o texto R de 9 bytes terminou em 10,088 s sem retransmissão. Uma tentativa posterior de JPEG em R foi cancelada e outra estava em andamento quando o arquivo terminou. Como o log da placa B nessa sessão não foi fornecido, os \texttt{@FIM} demonstram ACK final recebido por A, mas não documentam o caminho de arquivo efetivamente salvo no outro computador. Essa distinção é importante para uma apresentação em dois PCs.
+
+\subsection{Detecção e recuperação do erro injetado}
+\label{sec:erro_observado}
+O par \texttt{log\_COM5\_20261124\_090135.txt} / \texttt{log\_COM3\_20261124\_090130.txt} fornece a sequência completa de dois testes históricos. No primeiro, B iniciou o envio de 23 bytes às 09:23:26. Na tentativa inicial de \texttt{SEQ=1}, às 09:23:42, o emissor anotou \texttt{ERRO INJETADO}; A marcou \texttt{FCS INVALIDO} às 09:23:44. Sem ACK desse fragmento, B registrou timeout e \texttt{RETX DATA} às 09:23:48. A aceitou o novo \texttt{SEQ=1}, verificou o CRC-32 do objeto às 09:23:58, e B recebeu \texttt{@FIM 33724} às 09:24:00. O SHA-256 do texto recebido foi \texttt{5a3236c3f442e1ca0ef706d73e7b320bb22cdc045eba9f1dda028e8dfc7bb125}, igual ao do envio.
+
+No segundo teste, A iniciou 23 bytes em S às 09:25:12. O \texttt{SEQ=1} saiu com \texttt{ERRO INJETADO} às 09:25:17, B anotou \texttt{FCS INVALIDO} às 09:25:19, A reenviou às 09:25:23 e recebeu ACK às 09:25:27. B verificou o CRC-32 e salvou o texto às 09:25:35; A registrou \texttt{@FIM 22244}. O SHA-256 coincidente foi \texttt{da24097e87a40e10d41b66567c45fd2649f508e4b68608c221992a024fd59c92}. A injeção foi feita uma só vez, de modo que a retransmissão portou o byte correto. Esses dois episódios demonstram detecção, descarte, recuperação e entrega para a falha artificial especificada. O primeiro, com B transmitindo dados, pertence a uma versão anterior à regra atual de papéis; o segundo segue o sentido A--B.
+
+\subsection{Distância fotografada e alcance demonstrado}
+A Figura~\ref{fig:distancia} registra as duas montagens nas extremidades da bancada usada no ensaio. O grupo informou separação de aproximadamente 80 cm a 1 m. A imagem não contém trena, régua nem referência métrica confiável; assim, ela comprova o arranjo físico e a separação visual, mas não permite medir o vão com precisão. O enunciado solicita distância \emph{maior que 1 m}; uma estimativa que alcança no máximo 1 m não satisfaz essa desigualdade estrita. Portanto, o resultado positivo nesta bancada é reportado como funcionamento a 0,8--1,0 m, sem extrapolação para alcance maior.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth,keepaspectratio]{figuras/distancia_bancada.png}
+\caption{Montagens nas extremidades da mesa durante o ensaio. Distância aproximada de 0,8 a 1,0 m informada pelo grupo; a foto não contém escala para medição independente.}
+\label{fig:distancia}
+\end{figure}
+
+\section{Falhas observadas, hipóteses e correções}
+\label{sec:falhas}
+\subsection{Longas esperas sem ACK}
+O sintoma mais frequente de insucesso nos logs é a repetição de \texttt{Timeout | reenviando o que ficou sem ACK} seguida de \texttt{RETX DATA} do mesmo número de sequência. Em Stop-and-Wait, um único quadro sem confirmação impede o avanço; em Selective Repeat, o emissor pode continuar a confirmar outros elementos da janela, mas a base pendente bloqueia o progresso posterior. No exemplo de texto de 16 bytes iniciado às 18:33, o primeiro quadro acumulou 53 retransmissões sem ACK até o fim da captura. Esse padrão permite afirmar que A \emph{não observou uma confirmação válida}; ele não permite decidir, apenas pelo log de A, se B deixou de receber o DATA, se o ACK se perdeu no retorno, se a outra placa estava transmitindo em vez de escutar, ou se houve falha elétrica. Uma linha de timeout isolada também não é sinônimo de FCS inválido: muitos quadros degradados podem falhar antes de formar um quadro completo reconhecível.
+
+\subsection{Disputa entre iniciações de envio}
+Durante o desenvolvimento, ambos os programas permitiam iniciar objetos. O firmware, ao entrar no estado \texttt{enviando}, processava ACKs da própria sessão e ignorava DATA ou END recebidos. Se A e B começassem objetos ao mesmo tempo, cada placa poderia permanecer ocupada esperando resposta enquanto descartava o objeto da outra. Esse é um mecanismo de impasse identificado na revisão do código, coerente com algumas tentativas sem progresso, mas os logs incompletos não comprovam que ele foi a única causa de cada falha. A revisão adotada fixou o papel de aplicação: A inicia DATA/END e B recebe e devolve ACK; o Python impede a operação \texttt{t}/\texttt{i} na placa identificada como B. O rádio continua bidirecional para controle. A série posterior das 19:22 contém oito conclusões, um indício de melhora prática após a mudança. Como montagem, posição, alimentação e condições de RF não foram controladas entre as séries, não se atribui causalidade exclusiva à alteração do software.
+
+\subsection{Temporização e custo da confiabilidade}
+Na revisão do Selective Repeat, a pausa entre DATA sucessivos de uma rodada passou de 12 ms para 200 ms. O intervalo maior procura dar ao receptor mais tempo para terminar o processamento e a escuta antes da próxima emissão; o código atual também reserva 400 ms antes de responder com ACK, 250 ms depois de ACK e 3500 ms como limite de espera. O tempo de ocupação de rádio é elevado: cada bit Manchester contém duas metades de 5 ms, portanto um quadro lógico máximo de 21 bytes exige pelo menos $21\cdot 8\cdot 10\,\mathrm{ms}=1{,}68\,\mathrm{s}$ só para seus bits, além de preâmbulo, sincronismo, cauda e períodos de guarda. O acréscimo de pausa reduz a taxa bruta em troca de uma margem operacional maior. Há percepção do grupo de melhora após o ajuste, mas não foi realizado ensaio comparativo que isolasse somente o valor 12/200 ms, com mesma carga, posição e versão restante do código. Por isso, o relatório registra a decisão e seu motivo, não um ganho percentual demonstrado.
+
+\subsection{Falhas de USB, gravação e observabilidade}
+Os 12 avisos de desconexão serial incluem erros de acesso à porta, como \texttt{ClearCommError failed} no log COM3 das 18:05. Isso aponta uma falha na comunicação entre PC e ESP32 ou na disponibilidade da COM naquele instante; não é evidência direta de perda no ar. Nesses casos, reiniciar o terminal, verificar o cabo e fechar outro programa que ocupe a porta são verificações necessárias antes de atribuir o problema ao módulo RF. Outra fonte de confusão ocorreu quando ambas as placas responderam \texttt{@PRONTO RF1 A}: os dados podiam circular, mas o firmware sem OLED não apresentaria texto na tela. A identificação do papel na abertura do terminal passou a ser uma verificação operacional obrigatória.
+
+Há ainda uma limitação de observação: o ESP32 B pode enviar o ACK final e deixar a mensagem serial para o PC B, mas se o Python do receptor estiver fechado, o arquivo não aparecerá na pasta \texttt{recebidos}. O ACK final, portanto, comprova o término visto pelo transmissor e a verificação no firmware receptor; o arquivo salvo e o SHA-256 no segundo computador requerem o log da aplicação B. Na apresentação, manter ambos os terminais abertos e conferir tanto \texttt{@FIM} quanto \texttt{RECEBIDO:} evita declarar entrega ao PC com base em apenas um lado.
+
+\begin{table}[h]
+\centering
+\caption{Relação entre sintoma, evidência disponível e alcance da conclusão.}
+\begin{tabular}{p{3cm}p{4.2cm}p{5.2cm}}
+\toprule
+Sintoma & O que foi observado & Conclusão sustentada \\
+\midrule
+FCS inválido após \texttt{x} & Dois pares de logs, retransmissão e hash igual & Quadro corrompido foi descartado e o objeto acabou recuperado \\
+Muitos timeouts & Repetição de DATA sem ACK observado & Houve falta de confirmação; causa específica do caminho RF não isolada \\
+Ambas as placas como A & \texttt{@PRONTO RF1 A} em COM3 e COM5 & Papel incorreto para demonstrar OLED B nessa sessão \\
+Erro \texttt{ClearCommError} & Desconexão registrada no terminal & Falha local da interface serial; não mede qualidade do RF \\
+\texttt{@FIM} sem log B & Confirmação final no log A & Fim do protocolo observado por A; salvamento no PC B não documentado \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Critérios do projeto e estado das evidências}
+\begin{longtable}{p{5cm}p{3cm}p{5cm}}
+\caption{Situação dos itens relevantes para a demonstração.}\label{tab:criterios}\\
+\toprule
+Item & Estado & Base da avaliação \\
+\midrule
+\endfirsthead
+\toprule Item & Estado & Base da avaliação \\ \midrule
+\endhead
+Dois ESP32 e rádio entre placas & Demonstrado em bancada & Pares COM3/COM5 com recebimento e ACK; foto do arranjo \\
+Texto e imagem no computador receptor & Demonstrado & Arquivos salvos, CRC-32 e SHA-256 correspondente em pares de logs \\
+Stop-and-Wait e Selective Repeat & Demonstrado funcionalmente & Envios S e R concluídos; sem comparação controlada de desempenho \\
+Erro intencional, FCS e recuperação & Demonstrado & Dois ensaios das 09:23 e 09:25 com \texttt{FCS INVALIDO}, retransmissão e entrega \\
+Distância superior a 1 m & Pendente & Estimativa informada 0,8--1,0 m; foto sem escala \\
+Ruído externo controlado & Pendente & Injeção de byte não equivale a interferência física controlada \\
+Texto visível no OLED & Funcional segundo o grupo; registro visual pendente & Montagem OLED fotografada; não há foto final da frase exibida \\
+Uso de OLED no lugar do LCD pedido & Confirmação docente pendente & Divergência de tipo de display em relação ao enunciado \\
+Mesma carga S/R sob condições iguais & Pendente como comparação quantitativa & Amostras têm tamanhos, horários e condições diferentes \\
+\bottomrule
+\end{longtable}
 
 \section{Limitações e próximos ensaios}
 Cada DATA de 21 bytes, a 10 ms por bit Manchester, ocupa cerca de 1,68 s de transmissão lógica, além do preâmbulo, sincronismo, cauda, pausas e ACK. Por isso, imagens coloridas compactas de algumas centenas de bytes podem levar minutos. O modo monocromático é mais rápido, mas perde cor e detalhes. A foto JPEG recebida corresponde à versão compactada preparada no computador A, não ao arquivo de origem em resolução plena.
 
-Para completar os critérios presenciais: medir e registrar distância maior que 1 m; repetir a mesma mensagem curta com S e R e anotar tempo e retransmissões; executar \texttt{x} e guardar os dois logs mostrando erro de FCS, descarte e recuperação; registrar as condições de ruído; demonstrar o texto no OLED; e confirmar com o docente o uso do OLED em lugar do LCD. Esses ensaios não devem ser apresentados como realizados antes de sua execução.
+Para completar os critérios presenciais: medir e registrar distância \emph{maior} que 1 m com instrumento visível; repetir a mesma carga com S e R sob condições semelhantes e anotar tempo e retransmissões; registrar um ensaio de interferência física controlada, quando seguro e permitido no laboratório; fotografar o texto no OLED durante a entrega; e confirmar com o docente o uso do OLED em lugar do LCD. O teste \texttt{x}, antes pendente, já está documentado na Seção~\ref{sec:erro_observado}.
 
 \section{Conclusão}
-Foi implementado um enlace RF bidirecional de controle entre dois ESP32, com transmissão de texto e imagens do computador A ao B, CRC-8 por quadro, CRC-32 por objeto e dois métodos de ARQ. Os logs confirmam entregas de texto, PNG monocromático e JPEG compacto com SHA-256 correspondente nos dois computadores, inclusive após retransmissões. A demonstração do texto no OLED foi informada pelo grupo como funcional, mas não há fotografia ou registro de tela final anexado a esta versão do relatório. Distância superior a 1 m e ruído controlado permanecem pendentes de evidência.
+Foi implementado um enlace RF bidirecional de controle entre dois ESP32, com transmissão de texto e imagens do computador A ao B, CRC-8 por quadro, CRC-32 por objeto e dois métodos de ARQ. Os logs confirmam entregas de texto, PNG monocromático e JPEG compacto com SHA-256 correspondente nos dois computadores, inclusive após retransmissões. Dois ensaios históricos mostram corrupção proposital, descarte por FCS e posterior entrega. A mesma auditoria evidencia que a comunicação pode se tornar intermitente, com muitas retransmissões e sessões sem conclusão; o protocolo recupera certas perdas, mas não garante êxito quando o enlace ou a porta serial permanecem indisponíveis. A demonstração do texto no OLED foi informada pelo grupo como funcional, mas não há fotografia final do texto no display anexada. Distância superior a 1 m e ruído externo controlado permanecem pendentes de evidência.
 
 \section{Disponibilidade dos arquivos}
 O pacote de entrega contém código-fonte, instruções de montagem, este relatório em LaTeX e exemplos de logs e arquivos recebidos. O repositório deste projeto é \url{https://github.com/luannarabeloo/esp32-rf-433mhz-texto-imagem}. O repositório citado em conversas anteriores foi apenas referência e não faz parte desta entrega.
